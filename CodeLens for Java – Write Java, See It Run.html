@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>CodeLens Java – Write Java, See It Run</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{--bg:#f7f7f5;--card:#fff;--tx:#1d1d1b;--mu:#6b6b66;--bd:#dcdcd6;--ac:#2f6fed;--hl:#fff3bf;--ch:#ffd8a8;--bar:#9db7f5;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17181a;--card:#222427;--tx:#ececea;--mu:#9a9a94;--bd:#3a3c40;--ac:#6c9bff;--hl:#4a4320;--ch:#7a4a1c;--bar:#3d5a99}}
+:root[data-theme="dark"]{--bg:#17181a;--card:#222427;--tx:#ececea;--mu:#9a9a94;--bd:#3a3c40;--ac:#6c9bff;--hl:#4a4320;--ch:#7a4a1c;--bar:#3d5a99}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{padding:14px 18px 4px}h1{font-size:20px;margin:0}header p{margin:2px 0 0;color:var(--mu);font-size:13px}
+.wrap{display:grid;grid-template-columns:minmax(260px,380px) 1fr;gap:14px;padding:12px 18px 24px;max-width:1200px;margin:auto}
+@media(max-width:760px){.wrap{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:10px;min-width:0}
+h3{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--mu);margin:0 0 8px}
+select,button,textarea{font:inherit;color:var(--tx);background:var(--card);border:1px solid var(--bd);border-radius:7px;padding:5px 10px}
+button{cursor:pointer}button:hover{border-color:var(--ac)}button.p{background:var(--ac);color:#fff;border-color:var(--ac)}
+.bar2{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+#code div{font:13px/1.6 ui-monospace,Menlo,Consolas,monospace;white-space:pre;padding:0 6px;border-radius:4px;overflow-x:auto}
+#code div span{color:var(--mu);display:inline-block;width:26px}#code .on{background:var(--hl);outline:1px solid var(--ac)}
+#ed{width:100%;height:290px;font:13px ui-monospace,Menlo,Consolas,monospace;box-sizing:border-box;display:none}
+input[type=range]{width:100%}
+.vars{display:flex;flex-direction:column;gap:12px}.v{border-bottom:1px dashed var(--bd);padding-bottom:10px}
+.v>b{font:600 13px ui-monospace,monospace}.v>small{color:var(--mu);margin-left:6px}
+.chip{display:inline-block;font:14px ui-monospace,monospace;padding:2px 10px;border:1px solid var(--bd);border-radius:14px;margin-left:8px}
+.chip.chg{background:var(--ch)}
+.row{display:flex;gap:4px;align-items:flex-end;overflow-x:auto;padding:6px 2px;margin-top:4px}
+.col{text-align:center;min-width:34px}.bar{background:var(--bar);border:1px solid var(--bd);border-radius:5px 5px 0 0;font:12px ui-monospace,monospace;padding-top:2px}
+.bar.chg,.box.chg{background:var(--ch)}.col i{display:block;font-size:11px;color:var(--mu);font-style:normal}.col em{display:block;font:600 11px ui-monospace,monospace;color:var(--ac);min-height:14px;font-style:normal}
+.box{border:1px solid var(--bd);border-radius:6px;min-width:44px;padding:5px 8px;text-align:center;font:14px ui-monospace,monospace;background:var(--bar)}
+.stk{display:flex;flex-direction:column;gap:3px;width:90px;margin-top:6px}.tag{font:600 11px ui-monospace,monospace;color:var(--ac)}
+.chain{display:flex;align-items:center;gap:4px;overflow-x:auto;padding:16px 2px 4px;margin-top:4px}
+.nd{position:relative}.nd em{position:absolute;top:-16px;left:0;font:600 11px ui-monospace,monospace;color:var(--ac);white-space:nowrap;font-style:normal}
+.ar{color:var(--mu)}svg text{fill:var(--tx);font:13px ui-monospace,monospace}svg line{stroke:var(--mu)}svg circle{fill:var(--bar);stroke:var(--bd)}svg .t{fill:var(--ac);font-weight:600;font-size:11px}
+#out{font:13px ui-monospace,monospace;white-space:pre-wrap;color:var(--mu)}#err{color:#d33;font-size:13px}
+details{margin-top:8px;font-size:12px;color:var(--mu)}code{font-family:ui-monospace,monospace}
+.g{border-collapse:collapse;margin-top:4px}.g td,.g th{border:1px solid var(--bd);padding:2px 8px;font:13px ui-monospace,monospace}.g th{color:var(--mu);font-weight:400}.g td.chg{background:var(--ch)}</style></head><body>
+<header><h1>CodeLens for Java</h1><p>Write Java and step through it. Variables, arrays, stacks, queues, lists, trees, maps and 2D grids are drawn live. Runs fully in your browser.</p></header>
+<div class="wrap">
+<div>
+ <div class="card">
+  <div class="bar2"><select id="ex"></select><button id="edit">Edit</button><button id="run" class="p">Run</button></div>
+  <h3>Java program</h3><div id="code"></div><textarea id="ed" spellcheck="false"></textarea>
+  <details><summary>What Java is supported?</summary><p>Single-file programs with <code>main</code>, static methods and recursion, <code>int/double/boolean/String</code>, arrays (1D/2D), loops, <code>if/switch</code>, user classes (use <code>this.field</code> inside methods), <code>ArrayList, LinkedList, Stack, Queue, ArrayDeque, PriorityQueue, HashMap, HashSet, StringBuilder, Arrays, Collections, Math</code>. Not supported: char arithmetic (<code>c - 'a'</code>), interfaces/lambdas/streams, multithreading, Scanner input. Limit: 3000 steps.</p></details>
+ </div>
+</div>
+<div class="card">
+ <div class="bar2"><button id="prev">&#9664; Prev</button><button id="play" class="p">&#9654; Play</button><button id="next">Next &#9654;</button><button id="rst">Reset</button>
+ <label style="font-size:13px;color:var(--mu)">Speed <input type="range" id="sp" min="1" max="10" value="5" style="width:90px;vertical-align:middle"></label><span id="st" style="color:var(--mu);font-size:13px"></span></div>
+ <input type="range" id="sl" min="0" max="0" value="0">
+ <h3 style="margin-top:10px">Memory / data structures</h3><div id="vars" class="vars"></div>
+ <h3 style="margin-top:12px">Output</h3><div id="out"></div><div id="err"></div>
+</div></div>
+<script>
+const EX={
+"Bubble sort":`public class Main {
+    public static void main(String[] args) {
+        int[] a = {5, 2, 9, 1, 6};
+        int n = a.length;
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = 0; j < n - i - 1; j++) {
+                if (a[j] > a[j + 1]) {
+                    int t = a[j];
+                    a[j] = a[j + 1];
+                    a[j + 1] = t;
+                }
+            }
+        }
+        System.out.println(Arrays.toString(a));
+    }
+}`,
+"Binary search":`public class Main {
+    public static void main(String[] args) {
+        int[] a = {2, 4, 7, 10, 15, 21, 30};
+        int target = 15;
+        int lo = 0;
+        int hi = a.length - 1;
+        int found = -1;
+        while (lo <= hi) {
+            int mid = (lo + hi) / 2;
+            if (a[mid] == target) {
+                found = mid;
+                lo = hi + 1;
+            } else if (a[mid] < target) {
+                lo = mid + 1;
+            } else {
+                hi = mid - 1;
+            }
+        }
+        System.out.println(found);
+    }
+}`,
+"Stack":`import java.util.*;
+public class Main {
+    public static void main(String[] args) {
+        Stack<Integer> stack = new Stack<>();
+        stack.push(4);
+        stack.push(8);
+        stack.push(15);
+        int top = stack.pop();
+        stack.push(16);
+        top = stack.peek();
+        System.out.println(top);
+    }
+}`,
+"Queue":`import java.util.*;
+public class Main {
+    public static void main(String[] args) {
+        Queue<Integer> queue = new LinkedList<>();
+        queue.add(1);
+        queue.add(2);
+        queue.add(3);
+        int x = queue.poll();
+        queue.add(4);
+        x = queue.poll();
+        System.out.println(x);
+    }
+}`,
+"Linked list reverse":`public class Main {
+    static class Node {
+        int val;
+        Node next;
+        Node(int v) { this.val = v; }
+    }
+    public static void main(String[] args) {
+        Node head = new Node(1);
+        head.next = new Node(2);
+        head.next.next = new Node(3);
+        head.next.next.next = new Node(4);
+        Node prev = null;
+        Node cur = head;
+        while (cur != null) {
+            Node nxt = cur.next;
+            cur.next = prev;
+            prev = cur;
+            cur = nxt;
+        }
+    }
+}`,
+"BST insert (recursion)":`public class Main {
+    static class Node {
+        int val;
+        Node left;
+        Node right;
+        Node(int v) { this.val = v; }
+    }
+    static Node insert(Node root, int v) {
+        if (root == null) return new Node(v);
+        if (v < root.val) root.left = insert(root.left, v);
+        else root.right = insert(root.right, v);
+        return root;
+    }
+    public static void main(String[] args) {
+        Node root = null;
+        int[] vals = {8, 3, 10, 1, 6, 14};
+        for (int i = 0; i < vals.length; i++) {
+            root = insert(root, vals[i]);
+        }
+    }
+}`,
+"HashMap + 2D array":`import java.util.*;
+public class Main {
+    public static void main(String[] args) {
+        String[] words = {"to", "be", "or", "not", "to", "be"};
+        Map<String, Integer> count = new HashMap<>();
+        for (int i = 0; i < words.length; i++) {
+            count.put(words[i], count.getOrDefault(words[i], 0) + 1);
+        }
+        int[][] grid = new int[3][4];
+        for (int r = 0; r < 3; r++) {
+            for (int c = 0; c < 4; c++) {
+                grid[r][c] = r * c;
+            }
+        }
+    }
+}`};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+let lines=[],snaps=[],pos=0,timer=null;
+$('ex').innerHTML=Object.keys(EX).map(k=>`<option>${k}</option>`).join('');
+let types={};
+/*JAVA-START*/
+const T='int|long|double|float|boolean|char|String|byte|short|[A-Z]\\w*';
+const dv=ty=>/^(int|long|double|float|short|byte)$/.test(ty)?0:ty==='boolean'?false:'null';
+function bal(s,i,o,c){let d=0;for(let k=i;k<s.length;k++){if(s[k]===o)d++;else if(s[k]===c&&--d===0)return k}return -1}
+function back(s,l){let st=l+1;
+  while(l>=0){const c=s[l];
+    if(c===')'||c===']'){const o=c===')'?'(':'[';let d=0;for(;l>=0;l--){if(s[l]===c)d++;else if(s[l]===o&&--d===0)break}l--;st=l+1}
+    else if(/[\w.$]/.test(c)){while(l>=0&&/[\w.$]/.test(s[l]))l--;st=l+1}
+    else break;
+    if(l<0||!/[\w.$)\]]/.test(s[l]))break}
+  return st}
+function fwd(s,r){while(s[r]===' ')r++;const a=r;if(s[r]==='-')r++;
+  while(r<s.length){const c=s[r];
+    if(c==='('||c==='['){const cl=c==='('?')':']';let d=0,k=r;for(;k<s.length;k++){if(s[k]===c)d++;else if(s[k]===cl&&--d===0)break}r=k+1}
+    else if(/[\w.$]/.test(c))r++;else break}
+  return{start:a,end:r}}
+function fixDiv(s){let i=0;
+  while((i=s.indexOf('/',i))>=0){
+    let l=i-1;while(l>=0&&s[l]===' ')l--;
+    const ls=back(s,l),rr=fwd(s,i+1);
+    if(l<0||rr.end<=rr.start){i++;continue}
+    const rep='__d('+fixDiv(s.slice(ls,l+1))+','+fixDiv(s.slice(rr.start,rr.end))+')';
+    s=s.slice(0,ls)+rep+s.slice(rr.end);i=ls+rep.length}
+  return s}
+function casts(s){let i;
+  while((i=s.search(/\(int\)/))>=0){const r=fwd(s,i+5);s=s.slice(0,i)+'Math.trunc('+s.slice(r.start,r.end)+')'+s.slice(r.end)}
+  return s.replace(/\((?:double|float|long|short|byte|char)\)\s*/g,'')}
+function initBraces(t){const re=/(?:\[\][ \t]*\w*[ \t]*=|\bnew[ \t]+\w+(?:[ \t]*\[[ \t]*\])+)[ \t]*\{/g;let m;
+  while((m=re.exec(t))){const o=m.index+m[0].length-1,c=bal(t,o,'{','}');if(c<0)break;
+    t=t.slice(0,o)+t.slice(o,c+1).replace(/\{/g,'[').replace(/\}/g,']')+t.slice(c+1);re.lastIndex=c}
+  return t}
+function javaToJs(src,types){
+  let t=src.replace(/\/\*[\s\S]*?\*\//g,m=>m.replace(/[^\n]/g,' ')).replace(/\/\/.*$/gm,'')
+    .replace(/^[ \t]*(import|package)\b.*$/gm,'').replace(/@\w+/g,'')
+    .replace(/\b(public|private|protected|final|abstract|synchronized)\b[ \t]*/g,'');
+  for(let k=0;k<3;k++)t=t.replace(/<[A-Z?][\w ,.?\[\]<>]*>|<>/g,'');
+  t=initBraces(t);
+  const dbl=new Set([...t.matchAll(/\b(?:double|float)(?:\[\])*[ \t]+(\w+)/g)].map(m=>m[1]));
+  const isD=l=>/\d\.\d|\(double\)|\(float\)|\b(?:double|float)\b/.test(l)||(l.match(/\w+/g)||[]).some(w=>dbl.has(w));
+  t=t.split('\n').map(l=>{
+    const d=isD(l);l=casts(l);
+    if(!d&&l.replace(/"(?:\\.|[^"\\])*"/g,'').includes('/')){
+      l=l.replace(/(\w[\w.]*(?:\[[^\]]*\])?)\s*\/=\s*([^;]+);/,'$1 = __d($1,$2);');l=fixDiv(l)}
+    return l}).join('\n');
+  t=t.replace(/System\.out\.println\(/g,'__p(').replace(/System\.out\.print\(/g,'__pr(').replace(/\.length\(\)/g,'.length')
+    .replace(/new[ \t]+(\w+)[ \t]*\[([^\]]+)\][ \t]*\[([^\]]*)\]/g,(m,ty,a,b)=>b.trim()?`__arr2(${a},${b},${dv(ty)})`:`__arr(${a},null)`)
+    .replace(/new[ \t]+(\w+)[ \t]*\[([^\]]+)\]/g,(m,ty,a)=>`__arr(${a},${dv(ty)})`)
+    .replace(/new[ \t]+\w+(?:[ \t]*\[[ \t]*\])+[ \t]*(?=\[)/g,'')
+    .replace(/catch\s*\(\s*[\w.|]+[ \t]+(\w+)\s*\)/g,'catch ($1)');
+  const cont={};
+  for(const m of t.matchAll(/\b(?:class|interface|enum)[ \t]+(\w+)[^{]*\{/g)){
+    const o=m.index+m[0].length-1,c=bal(t,o,'{','}');
+    if(c>0&&/\bstatic[ \t]+(?!class\b)/.test(t.slice(o,c)))cont[m[1]]=1}
+  const MT=new RegExp('^([ \\t]*)(?:static[ \\t]+)?(?:'+T+'|void)(?:\\[\\])*[ \\t]+(\\w+)[ \\t]*\\(([^)]*)\\)[ \\t]*(?:throws[^{]*)?\\{');
+  const FT=new RegExp('^([ \\t]*)(static[ \\t]+)?('+T+')(?:\\[\\])*[ \\t]+(\\w+)[ \\t]*(?:=[ \\t]*(.*))?;[ \\t]*$');
+  const DECL=new RegExp('\\b('+T+')((?:\\[\\])*)[ \\t]+(\\w+)(?=[ \\t]*[=;,:)])','g');
+  const par=p=>p.split(',').map(x=>x.trim().split(/\s+/).pop()).filter(Boolean).join(',');
+  const fns=[],glob=new Set(),ctx=[],res=[];let prev='';
+  t.split('\n').forEach((raw,idx)=>{
+    let L=raw,s=raw.trim(),top=ctx[ctx.length-1],kind='blk',name='',fid=-1,m;
+    const inCls=top&&top.k==='class',inCont=!top||top.k==='cont';
+    const fc=[...ctx].reverse().find(c=>c.k==='func');
+    if(m=s.match(/^(?:static[ \t]+)?(?:class|interface|enum)[ \t]+(\w+)/)){
+      name=m[1];kind=cont[name]?'cont':'class';
+      L=kind==='cont'?'':L.replace(/\bstatic[ \t]+/,'').replace(/[ \t]+implements[ \t]+[\w ,]+/,'')}
+    else if(inCls&&(m=L.match(new RegExp('^([ \\t]*)'+top.name+'[ \\t]*\\(([^)]*)\\)[ \\t]*\\{')))){
+      fns.push({name:top.name+'.new',names:new Set(par(m[2]).split(',').filter(Boolean))});fid=fns.length-1;kind='func';
+      L=m[1]+'constructor('+par(m[2])+'){'+L.slice(m[0].length)}
+    else if((inCls||inCont)&&(m=L.match(MT))){
+      const st=/^[ \t]*static\b/.test(L);
+      fns.push({name:m[2],names:new Set(par(m[3]).split(',').filter(Boolean))});fid=fns.length-1;kind='func';
+      L=m[1]+(inCls?(st?'static ':''):'function ')+m[2]+'('+par(m[3])+'){'+L.slice(m[0].length)}
+    else if(inCls&&(m=L.match(FT))){
+      L=m[1]+'/*F*/ '+(m[2]?'static ':'')+m[4]+' = '+(m[5]!==undefined?m[5]:dv(m[3]))+';'}
+    else{
+      L=L.replace(/^([ \t]*)static[ \t]+/,'$1');
+      L=L.replace(DECL,(a,ty,br,nm)=>{types[nm]=ty+br;return 'var '+nm});
+      L=L.replace(/for\s*\(\s*var\s+(\w+)\s*:/,'for (var $1 of');
+      let ns=[...L.matchAll(/\bvar\s+(\w+)/g)].map(x=>x[1]);
+      if(ns.length)ns=ns.concat([...L.matchAll(/,\s*(\w+)\s*=(?!=)/g)].map(x=>x[1]));
+      if(fc)ns.forEach(n=>fns[fc.fid].names.add(n));else if(!inCls)ns.forEach(n=>glob.add(n))}
+    const st2=L.trim();
+    if(fc&&st2&&!/^[}{]|^(else|case|default|catch|finally)\b|^\/\*F/.test(st2)&&(!prev||/[;{}]$/.test(prev)||/^(case|default)\b.*:$/.test(prev)))L='__S('+(idx+1)+','+fc.fid+');'+L;
+    if(st2)prev=st2;
+    const br=raw.replace(/"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g,'""');let first=true;
+    for(const c of br){
+      if(c==='{'){ctx.push(first&&kind!=='blk'?{k:kind,name,fid}:{k:'blk'});first=false}
+      else if(c==='}'){const p=ctx.pop();if(p&&p.k==='cont'&&s==='}')L='';if(p&&p.k==='func'&&s==='}'&&p.fid>=0)L='__S('+(idx+1)+','+p.fid+');}'}}
+    res.push(L)});
+  const G=[...glob];
+  return res.join('\n').replace(/__S\((\d+),(\d+)\);/g,(m,n,f)=>{
+    const F=fns[f],nm=[...new Set([...F.names,...G])].filter(x=>x&&x!=='args');
+    return`__s(${n},${JSON.stringify(F.name)},{${nm.map(x=>x+':'+x).join(',')}});`})+'\nmain([]);'}
+/*JAVA-END*/
+const ext=(o,m)=>{for(const k in m)Object.defineProperty(o,k,{value:m[k],writable:true,configurable:true})};
+const fmt=x=>Array.isArray(x)?'['+x.map(fmt).join(', ')+']':x instanceof Map?'{'+[...x].map(([k,v])=>k+'='+fmt(v)).join(', ')+'}':x instanceof Set?'['+[...x].join(', ')+']':x==null?'null':typeof x==='object'?(x.toString!==Object.prototype.toString?x.toString():JSON.stringify(x)):String(x);
+const cmp=(a,b)=>a<b?-1:a>b?1:0;
+ext(Array.prototype,{add(a,b){if(arguments.length>1)this.splice(a,0,b);else Array.prototype.push.call(this,a);return true},get(i){return this[i]},set(i,v){const o=this[i];this[i]=v;return o},size(){return this.length},isEmpty(){return !this.length},empty(){return !this.length},contains(x){return this.includes(x)},clear(){this.length=0},remove(x){if(x===undefined)return this.shift();if(typeof x==='number')return this.splice(x,1)[0];const i=this.indexOf(x);if(i>=0)this.splice(i,1);return i>=0},addFirst(x){this.unshift(x)},removeFirst(){return this.shift()},removeLast(){return Array.prototype.pop.call(this)},peekFirst(){return this[0]},peekLast(){return this[this.length-1]},getKey(){return this[0]},getValue(){return this[1]}});
+ext(String.prototype,{equals(o){return this.valueOf()===o},equalsIgnoreCase(o){return this.toLowerCase()===String(o).toLowerCase()},compareTo(o){return cmp(this.valueOf(),o)},isEmpty(){return !this.length},contains(x){return this.includes(x)},toCharArray(){return this.split('')}});
+ext(Object.prototype,{equals(o){return this===o||this.valueOf()===o}});
+class JList extends Array{constructor(x){super();if(Array.isArray(x))Array.prototype.push.apply(this,x)}}
+class JStack extends JList{peek(){return this[this.length-1]}}
+class JQ extends JList{add(x){Array.prototype.push.call(this,x);return true}offer(x){return this.add(x)}addLast(x){this.add(x)}push(x){this.unshift(x)}pop(){return this.shift()}peek(){return this[0]}poll(){return this.shift()}}
+class JPQ extends JQ{add(x){Array.prototype.push.call(this,x);this.sort(cmp);return true}}
+class JSet extends Set{contains(x){return this.has(x)}remove(x){return this.delete(x)}size(){return super.size}isEmpty(){return !super.size}}
+class JMap extends Map{put(k,v){const o=this.get(k);this.set(k,v);return o}containsKey(k){return this.has(k)}getOrDefault(k,d){return this.has(k)?this.get(k):d}remove(k){const o=this.get(k);this.delete(k);return o}size(){return super.size}isEmpty(){return !super.size}keySet(){return new JSet([...this.keys()])}entrySet(){return[...this.entries()]}containsValue(v){return[...this.values()].includes(v)}}
+class SB{constructor(s){this.s=s||''}append(x){this.s+=fmt(x);return this}toString(){return this.s}get length(){return this.s.length}reverse(){this.s=[...this.s].reverse().join('');return this}}
+const LIB={ArrayList:JList,Vector:JList,LinkedList:JQ,ArrayDeque:JQ,Stack:JStack,PriorityQueue:JPQ,HashMap:JMap,TreeMap:JMap,LinkedHashMap:JMap,HashSet:JSet,TreeSet:JSet,LinkedHashSet:JSet,StringBuilder:SB,
+ RuntimeException:Error,Exception:Error,IllegalArgumentException:Error,IllegalStateException:Error,
+ Integer:{MAX_VALUE:2147483647,MIN_VALUE:-2147483648,parseInt:x=>parseInt(x),valueOf:x=>+x,compare:cmp,toString:x=>''+x},
+ Character:{isDigit:c=>/\d/.test(c),isLetter:c=>/[a-z]/i.test(c)},
+ Arrays:{toString:a=>fmt(a),sort:a=>a.sort(cmp),fill:(a,v)=>a.fill(v),copyOf:(a,n)=>Array.from({length:n},(_,i)=>i<a.length?a[i]:0),asList:(...a)=>new JList(a)},
+ Collections:{sort:a=>a.sort(cmp),reverse:a=>a.reverse(),swap:(a,i,j)=>{[a[i],a[j]]=[a[j],a[i]]}}};
+function runJava(src){
+  const snaps=[],out=[];let err='',steps=0,cur='';types={};
+  const env={...LIB,
+    __s(line,fn,vars){if(++steps>3000)throw Error('Stopped after 3000 steps (infinite loop?)');
+      const v={};for(const k in vars)if(vars[k]!==undefined&&typeof vars[k]!=='function')v[k]=vars[k];
+      snaps.push(structuredClone({line:line-1,fn,vars:v,out:out.slice()}))},
+    __p:x=>{out.push(cur+fmt(x));cur=''},__pr:x=>{cur+=fmt(x)},
+    __d:(a,b)=>{if(b===0)throw Error('ArithmeticException: / by zero');return Number.isInteger(a)&&Number.isInteger(b)?Math.trunc(a/b):a/b},
+    __arr:(n,d)=>Array.from({length:n},()=>d),
+    __arr2:(n,m,d)=>Array.from({length:n},()=>Array.from({length:m},()=>d))};
+  try{const code=javaToJs(src,types);new Function(...Object.keys(env),code)(...Object.values(env))}catch(e){err=e.message}
+  const l=snaps[snaps.length-1];
+  if(l)snaps.push({...l,line:-1,fn:err?l.fn:'(finished)',out:out.slice()});
+  return{snaps,err}}
+function build(){stop();pos=0;lines=$('ed').value.split('\n');
+  const r=runJava($('ed').value);snaps=r.snaps;
+  if(!snaps.length)snaps=[{line:-1,fn:'-',vars:{},out:[]}];
+  $('err').textContent=r.err?'Error: '+r.err:'';$('sl').max=snaps.length-1;$('sl').value=0;show()}
+const isM=o=>o instanceof Map,isS=o=>o instanceof Set,isO=o=>o&&typeof o==='object'&&!Array.isArray(o)&&!isM(o)&&!isS(o);
+const isN=o=>isO(o)&&('next' in o||'left' in o||'right' in o);
+const lab=n=>{for(const k of['val','data','value','key','id','name'])if(k in n)return n[k];const k=Object.keys(n).find(k=>n[k]===null||typeof n[k]!=='object');return k?n[k]:'*'};
+const J=v=>v===null?'null':typeof v==='object'||typeof v==='string'?JSON.stringify(v):String(v);
+const same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
+function kids(n){return[n.next,n.left,n.right].filter(Boolean)}
+function reach(n){const s=new Set(),st=[n];while(st.length){const x=st.pop();if(!x||s.has(x))continue;s.add(x);st.push(...kids(x))}return s}
+function grid(a,o){return`<table class="g">${a.map((r,i)=>`<tr><th>${i}</th>${r.map((x,j)=>`<td class="${o&&o[i]&&!same(o[i][j],x)?'chg':''}">${esc(J(x))}</td>`).join('')}</tr>`).join('')}</table>`}
+function arr(name,a,s,o){
+  o=Array.isArray(o)?o:[];const ch=i=>!same(o[i],a[i]),T=types[name]||'';
+  const kind=T==='Stack'?'stack':/^(Queue|Deque|LinkedList|ArrayDeque|PriorityQueue)$/.test(T)?'queue':'array';
+  if(!a.length)return'<div class="tag">(empty)</div>';
+  if(kind==='stack')return`<div class="stk">${a.map((x,i)=>`<div class="box ${ch(i)?'chg':''}">${esc(J(x))}${i==a.length-1?' <span class="tag">&larr; top</span>':''}</div>`).reverse().join('')}</div>`;
+  if(kind==='queue')return`<div class="row" style="align-items:flex-start">${a.map((x,i)=>`<div><div class="box ${ch(i)?'chg':''}">${esc(J(x))}</div><div class="tag" style="text-align:center">${i==0?'front':''}${i==0&&i==a.length-1?' / ':''}${i==a.length-1?'rear':''}</div></div>`).join('')}</div>`;
+  const ptr={};for(const[k,v]of Object.entries(s.vars))if(typeof v==='number'&&Number.isInteger(v)&&v>=0&&v<a.length)(ptr[v]=ptr[v]||[]).push(k);
+  const nums=a.every(x=>typeof x==='number'),mx=Math.max(1,...a.map(Math.abs));
+  return`<div class="row">${a.map((x,i)=>`<div class="col"><div class="bar ${ch(i)?'chg':''}" style="height:${nums?24+Math.abs(x)/mx*70:30}px">${esc(J(x))}</div><i>${i}</i><em>${(ptr[i]||[]).join(',')}</em></div>`).join('')}</div>`;
+}
+function chain(root,names){
+  let h='<div class="chain">',n=root,seen=new Set();
+  while(n&&!seen.has(n)){seen.add(n);h+=`<div class="nd"><em>${(names.get(n)||[]).join(',')}</em><div class="box">${esc(lab(n))}</div></div><span class="ar">&rarr;</span>`;n=n.next}
+  return h+(n?'<span class="ar">(cycle)</span>':'<span class="ar">null</span>')+'</div>';
+}
+function tree(root,names){
+  let c=0,md=0;const pos=new Map();
+  (function lay(n,d){if(!n||pos.has(n)||d>7)return;md=Math.max(md,d);lay(n.left,d+1);pos.set(n,{x:c++,d});lay(n.right,d+1)})(root,0);
+  const W=Math.max(c*48,80),H=(md+1)*56+10;let e='',nd='';
+  for(const[n,p]of pos){const x=p.x*48+24,y=p.d*56+22;
+    for(const k of[n.left,n.right])if(k&&pos.has(k)){const q=pos.get(k);e+=`<line x1="${x}" y1="${y}" x2="${q.x*48+24}" y2="${q.d*56+22}"/>`}
+    nd+=`<circle cx="${x}" cy="${y}" r="16"/><text x="${x}" y="${y+4}" text-anchor="middle">${esc(lab(n))}</text><text class="t" x="${x}" y="${y+32}" text-anchor="middle">${(names.get(n)||[]).join(',')}</text>`}
+  return`<div style="overflow-x:auto"><svg width="${W}" height="${H}">${e}${nd}</svg></div>`;
+}
+function show(){
+  const s=snaps[pos],p=snaps[pos-1],same_fn=p&&p.fn===s.fn;
+  $('code').innerHTML=lines.map((l,i)=>`<div class="${i===s.line?'on':''}"><span>${i+1}</span>${esc(l)}</div>`).join('');
+  const E=Object.entries(s.vars),names=new Map();
+  E.forEach(([k,v])=>{if(isN(v)){if(!names.has(v))names.set(v,[]);names.get(v).push(k)}});
+  const uniq=[...names.keys()],roots=uniq.filter(n=>!uniq.some(m=>m!==n&&reach(m).has(n)));
+  let h=`<div class="tag">in ${esc(s.fn)}()</div>`;
+  for(const[k,v]of E){
+    const o=same_fn?p.vars[k]:undefined,c=same_fn&&!same(o,v);
+    if(isN(v))continue;
+    if(Array.isArray(v))h+=`<div class="v"><b>${k}</b><small>${esc(types[k]||'array')}[${v.length}]</small>${v.length&&v.every(Array.isArray)?grid(v,o):arr(k,v,s,o)}</div>`;
+    else if(isM(v))h+=`<div class="v"><b>${k}</b><small>map(${v.size})</small><table class="g">${[...v].map(([a,b])=>`<tr><th>${esc(J(a))}</th><td class="${isM(o)&&same(o.get(a),b)?'':'chg'}">${esc(J(b))}</td></tr>`).join('')}</table></div>`;
+    else if(isS(v))h+=`<div class="v"><b>${k}</b><small>set(${v.size})</small><div class="row">${[...v].map(x=>`<div class="box">${esc(J(x))}</div>`).join('')}</div></div>`;
+    else if(isO(v))h+=`<div class="v"><b>${k}</b><small>object</small><table class="g">${Object.entries(v).map(([a,b])=>`<tr><th>${a}</th><td class="${o&&!same(o[a],b)?'chg':''}">${esc(J(b))}</td></tr>`).join('')}</table></div>`;
+    else h+=`<div class="v"><b>${k}</b><span class="chip ${c?'chg':''}">${esc(J(v))}</span></div>`;
+  }
+  for(const r of roots){const isT='left' in r;h+=`<div class="v"><b>${(names.get(r)||[]).join(', ')}</b><small>${isT?'binary tree':'linked list'}</small>${isT?tree(r,names):chain(r,names)}</div>`}
+  $('vars').innerHTML=h;
+  $('out').textContent=s.out.join('\n');
+  $('st').textContent=`step ${pos+1}/${snaps.length}`;$('sl').value=pos;
+}
+function go(i){pos=Math.max(0,Math.min(snaps.length-1,i));show()}
+function stop(){clearInterval(timer);timer=null;$('play').innerHTML='&#9654; Play'}
+function play(){if(timer)return stop();if(pos>=snaps.length-1)pos=0;$('play').innerHTML='&#10074;&#10074; Pause';
+  timer=setInterval(()=>{if(pos>=snaps.length-1)return stop();go(pos+1)},1100-$('sp').value*100)}
+$('ex').onchange=()=>{$('ed').value=EX[$('ex').value];build()};
+$('edit').onclick=()=>{const on=$('ed').style.display==='block';$('ed').style.display=on?'none':'block';$('code').style.display=on?'block':'none';$('edit').textContent=on?'Edit':'Hide editor'};
+$('run').onclick=()=>{$('ed').style.display='none';$('code').style.display='block';$('edit').textContent='Edit';build()};
+$('prev').onclick=()=>{stop();go(pos-1)};$('next').onclick=()=>{stop();go(pos+1)};$('rst').onclick=()=>{stop();go(0)};
+$('play').onclick=play;$('sl').oninput=e=>{stop();go(+e.target.value)};
+$('sp').oninput=()=>{if(timer){stop();play()}};
+$('ed').value=EX["Bubble sort"];build();
+</script></body></html>
